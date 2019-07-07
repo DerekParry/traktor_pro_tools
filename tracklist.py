@@ -1,10 +1,18 @@
 import xml.etree.ElementTree as ET
+import configparser
+import sys
 
 
 def get_xml_root(path):
 	tree = ET.parse(path)
 	return tree.getroot()
 
+def get_file_paths():
+	config = configparser.ConfigParser()
+	config.read('config.ini')
+	collection_file_path = config['paths']['COLLECTION_FILE']
+	history_dir_path = config['paths']['HISTORY_DIR']
+	return collection_file_path, history_dir_path
 
 def get_track_name(root, pk):
 		key = pk.get('KEY')
@@ -15,12 +23,11 @@ def get_track_name(root, pk):
 		entry = root.find(f'COLLECTION/ENTRY/LOCATION[@FILE="{file_name}"]...')
 		artist = entry.get('ARTIST')
 		title = entry.get('TITLE')
-		return f'{artist} - {title}'
+		return f'{artist} - {title}' if artist else title
 
 def print_tracklist(tracklist):
 	for index, track in enumerate(tracklist):
-		print(f'{index:02}.\t{track}')
-
+		print(f'{index+1:02}.\t{track}')
 
 def get_history(path):
 	root = get_xml_root(path)
@@ -32,19 +39,25 @@ def get_history(path):
 
 	print_tracklist(tracklist)
 
+def get_playlist(collection_file_path, name):
+	root = get_xml_root(collection_file_path)
+	playlist = root.find(f'PLAYLISTS/NODE/SUBNODES/NODE[@NAME="{name}"]')
 
-def get_playlist(name):
-	root = get_xml_root(name)
+	print('------------------------')
+	print(f'PLAYLIST: {name}')
+	print('------------------------')
+	
+	tracklist = []
+	for pk in playlist.findall('PLAYLIST/ENTRY/PRIMARYKEY'):
+		track = get_track_name(root, pk)
+		tracklist.append(track)
 
-	# TODO match NAME
-	for playlist in root.findall('PLAYLISTS/NODE/SUBNODES/NODE[@TYPE="PLAYLIST"]'):
-		print('------------')
-		print(playlist.get("NAME"))
-		print('------------')
-		
-		tracklist = []
-		for pk in playlist.findall('PLAYLIST/ENTRY/PRIMARYKEY'):
-			track = get_track_name(root, pk)
-			tracklist.append(track)
+	print_tracklist(tracklist)
 
-		print_tracklist(tracklist)
+def main():
+	collection_file_path, history_dir_path = get_file_paths()
+	# get_history(history_dir_path + 'history_2019y07m01d_23h40m28s.nml')
+	# get_playlist(collection_file_path, '07-01-19')
+
+if __name__ == '__main__':
+	main()
