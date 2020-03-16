@@ -1,5 +1,5 @@
 ## Tools for Native Instruments "Traktor Pro" DJ software
-*(Works with ver 3.2.1, latest release as of 3/16/2020)*
+*(Confirmed to work with Traktor Pro ver 3.2.1 on macOS Catalina)*
 
 This project was designed to contain tools for working with the "Traktor Pro" DJ software. There is currently one script, but I plan to add more scripts and functionality as needed.
 
@@ -8,6 +8,8 @@ This project was designed to contain tools for working with the "Traktor Pro" DJ
 This project contains a Makefile with two rules:
 - *make* (or *make create*) => creates a virtual environment directory (~/ve/) and installs all required packages via pip
 - *make clean* => deletes the virtual environment directory from the above command
+
+This project also contains a config file (~/config.ini). Before running, the user must enter the correct paths for Traktor's "collection.nml" file and "History" directory. If these are at the application's default locations, then the user will only have to change the value of "*myuser*" to the correct macOS username. 
 
 ### tracklist.py
 
