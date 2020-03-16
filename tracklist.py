@@ -1,9 +1,17 @@
 #!ve/bin/python3
 
 import xml.etree.ElementTree as ET
+import argparse
 import configparser
 import sys
 
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--playlistname', required=False)
+    parser.add_argument('--archivename', required=False)
+    args = parser.parse_args()
+    return args.playlistname, args.archivename
 
 def get_xml_root(path):
 	tree = ET.parse(path)
@@ -57,9 +65,14 @@ def get_playlist(collection_file_path, name):
 	print_tracklist(tracklist)
 
 def main():
+	playlistname, archivename = parse_args()
 	collection_file_path, history_dir_path = get_file_paths()
-	# get_history(history_dir_path + 'history_2019y07m01d_23h40m28s.nml')
-	# get_playlist(collection_file_path, '07-01-19')
+
+	if playlistname:
+		get_playlist(collection_file_path, playlistname)
+	if archivename:
+		get_history(history_dir_path + archivename + '.nml')
+
 
 if __name__ == '__main__':
 	main()
