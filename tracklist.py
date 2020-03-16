@@ -1,3 +1,5 @@
+#!ve/bin/python3
+
 import xml.etree.ElementTree as ET
 import configparser
 import sys
