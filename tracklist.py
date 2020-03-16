@@ -8,10 +8,10 @@ import sys
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--playlistname', required=False)
-    parser.add_argument('--archivename', required=False)
+    parser.add_argument('--playlist', required=False)
+    parser.add_argument('--archive', required=False)
     args = parser.parse_args()
-    return args.playlistname, args.archivename
+    return args.playlist, args.archive
 
 def get_xml_root(path):
 	tree = ET.parse(path)
@@ -25,24 +25,30 @@ def get_file_paths():
 	return collection_file_path, history_dir_path
 
 def get_track_name(root, pk):
-		key = pk.get('KEY')
-		file_start_index = key.rfind('/:') + 2
-		file_dir = key[:file_start_index]
-		file_name = key[file_start_index:]
+	key = pk.get('KEY')
+	file_start_index = key.rfind('/:') + 2
+	file_dir = key[:file_start_index]
+	file_name = key[file_start_index:]
 
-		entry = root.find(f'COLLECTION/ENTRY/LOCATION[@FILE="{file_name}"]...')
-		artist = entry.get('ARTIST')
-		title = entry.get('TITLE')
-		return f'{artist} - {title}' if artist else title
+	entry = root.find(f'COLLECTION/ENTRY/LOCATION[@FILE="{file_name}"]...')
+	artist = entry.get('ARTIST')
+	title = entry.get('TITLE')
+	return f'{artist} - {title}' if artist else title
 
 def print_tracklist(tracklist):
 	for index, track in enumerate(tracklist):
 		print(f'{index+1:02}.\t{track}')
+	print()
 
-def get_history(path):
+def get_archive(history_file_path, name):
+	path = history_file_path + name + '.nml'
 	root = get_xml_root(path)
-	tracklist = []
 
+	print('------------------------')
+	print(f'ARCHIVE: {name}')
+	print('------------------------')
+
+	tracklist = []
 	for pk in root.findall('PLAYLISTS/NODE/SUBNODES/NODE/PLAYLIST/ENTRY/PRIMARYKEY'):
 		track = get_track_name(root, pk)
 		tracklist.append(track)
@@ -56,7 +62,7 @@ def get_playlist(collection_file_path, name):
 	print('------------------------')
 	print(f'PLAYLIST: {name}')
 	print('------------------------')
-	
+
 	tracklist = []
 	for pk in playlist.findall('PLAYLIST/ENTRY/PRIMARYKEY'):
 		track = get_track_name(root, pk)
@@ -65,13 +71,16 @@ def get_playlist(collection_file_path, name):
 	print_tracklist(tracklist)
 
 def main():
-	playlistname, archivename = parse_args()
+	playlist, archive = parse_args()
 	collection_file_path, history_dir_path = get_file_paths()
 
-	if playlistname:
-		get_playlist(collection_file_path, playlistname)
-	if archivename:
-		get_history(history_dir_path + archivename + '.nml')
+	if not playlist and not archive:
+		print('No arguments provided - please specify a playlist or archive')
+
+	if playlist:
+		get_playlist(collection_file_path, playlist)
+	if archive:
+		get_archive(history_dir_path, archive)
 
 
 if __name__ == '__main__':
